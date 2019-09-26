@@ -24,7 +24,7 @@ public class App
             LOGGER.error("Error getting city code");
 
             System.exit(0);
-        }else{
+        } else {
             cityCode=Integer.parseInt(args[0]);
             LOGGER.info("City code:"+cityCode);
 
@@ -34,6 +34,22 @@ public class App
             .addConverterFactory(GsonConverterFactory. create ())
             .build();
         IpmaService service = retrofit.create(IpmaService.class);
+
+        // get city code by the name
+        if(args.length == 2) {
+            Call<IpmaCities> callSyncCities = service.getAllCities();
+            try {
+                Response<IpmaCities> apiResponseCities = callSyncCities.execute();
+                IpmaCities allCities = apiResponseCities.body();
+                for(City c : allCities.getData()) {
+                    if(c.getLocal().equals(args[1]))
+                        cityCode = c.getGlobalIdLocal();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        System.out.println("City code " + cityCode);
         Call<IpmaCityForecast> callSync = service.getForecastForACity( cityCode );
         try {
             Response<IpmaCityForecast> apiResponse = callSync.execute();
